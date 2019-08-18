@@ -10,6 +10,7 @@ import keyboard
 import threading
 import pickle
 import numpy as np
+import argparse
 
 import design
 import about
@@ -584,7 +585,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
     # undo split button and hotkey connect to here
     def undoSplit(self):
         # if the auto splitter is paused or the undo split button is enabled, do nothing.
-        if self.undosplitButton.isEnabled() == False or self.split_image_number == 0:
+        if self.undosplitButton.isEnabled() == False or self.split_image_number == args.firstSplitIndex:
             return
 
         # subtract 1 from the split image number
@@ -597,7 +598,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.skipsplitButton.setEnabled(True)
 
         # if it's the first split image, disable the undo split button
-        if self.split_image_number == 0:
+        if self.split_image_number == args.firstSplitIndex:
             self.undosplitButton.setEnabled(False)
         else:
             self.undosplitButton.setEnabled(True)
@@ -618,7 +619,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.skipsplitButton.setEnabled(False)
         else:
             self.skipsplitButton.setEnabled(True)
-        if self.split_image_number == 0:
+        if self.split_image_number == args.firstSplitIndex:
             self.undosplitButton.setEnabled(False)
         else:
             self.undosplitButton.setEnabled(True)
@@ -630,6 +631,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
     # reset button and hotkey connects here.
     def reset(self):
         self.startautosplitterButton.setText('Start Auto Splitter')
+        if (args.autoClose):
+            self.closeEvent(None)
         return
 
     # functions for the hotkeys to return to the main thread from signals and start their corresponding functions
@@ -718,7 +721,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.customthresholdsCheckBox.setEnabled(False)
 
 
-        self.split_image_number = 0
+        self.split_image_number = args.firstSplitIndex
         self.number_of_split_images = len(os.listdir(self.split_image_directory))
 
         # First while loop: stays in this loop until all of the split images have been split
@@ -804,7 +807,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                     self.skipsplitButton.setEnabled(True)
 
                 # if its the first split image, disable the undo split button
-                if self.split_image_number == 0:
+                if self.split_image_number == args.firstSplitIndex:
                     self.undosplitButton.setEnabled(False)
                 else:
                     self.undosplitButton.setEnabled(True)
@@ -837,7 +840,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 self.currentSplitImage.setAlignment(QtCore.Qt.AlignCenter)
 
                 # if its the first split image, disable the undo split button
-                if self.split_image_number == 0:
+                if self.split_image_number == args.firstSplitIndex:
                     self.undosplitButton.setEnabled(False)
                 else:
                     self.undosplitButton.setEnabled(True)
@@ -898,6 +901,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.custompausetimesCheckBox.setEnabled(True)
         self.customthresholdsCheckBox.setEnabled(True)
         QtGui.QApplication.processEvents()
+        if (args.autoClose):
+            self.closeEvent(None)
 
     def updateSplitImage(self):
 
@@ -1188,15 +1193,33 @@ class AboutWidget(QtGui.QWidget, about.Ui_aboutAutoSplitWidget):
         self.donatebuttonLabel.setOpenExternalLinks(True)
         self.show()
 
+def commandLineParseArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d','--cwd',
+    help='current working directory (where settings.pkl will be store)', type=str, default="")
+    parser.add_argument('-l', '--autoLaunch', 
+    help='launch the GUI minimized and start imediatly. Work only with the presence of settings.pkl', action='store_true')
+    parser.add_argument('-a', '--autoClose', 
+    help='close after last split or reset. (Avoid it without --autoLaunch)', action='store_true')
+    parser.add_argument('-i', '--firstSplitIndex', type=int,
+    help='the first image will at the specific numer asked. (Avoid it without --autoLaunch)', default=0)
+    return parser.parse_args()
 
 def main():
+    if (args.cwd != ""):
+        os.chdir(args.cwd)
     app = QtGui.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('icon.ico'))
     w = AutoSplit()
     w.setWindowIcon(QtGui.QIcon('icon.ico'))
-    w.show()
+    if (args.autoLaunch):
+        w.showMinimized()
+        w.autoSplitter()
+    else:
+        w.show()
     sys.exit(app.exec_())
 
+args = commandLineParseArgs()
 
 if __name__ == '__main__':
     main()
