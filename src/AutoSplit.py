@@ -27,8 +27,6 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
     resetSignal = QtCore.pyqtSignal()
     skipSplitSignal = QtCore.pyqtSignal()
     undoSplitSignal = QtCore.pyqtSignal()
-    startScreenshotLoopSignal = QtCore.pyqtSignal()
-    endScreenshotLoopSignal = QtCore.pyqtSignal()
     afterSettingHotkeySignal = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
@@ -79,8 +77,6 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.resetSignal.connect(self.reset)
         self.skipSplitSignal.connect(self.skipSplit)
         self.undoSplitSignal.connect(self.undoSplit)
-        self.startScreenshotLoopSignal.connect(self.activateScreenshotLoop)
-        self.endScreenshotLoopSignal.connect(self.disableScreenshotLoop)
 
         # live image checkbox
         self.liveimageCheckBox.clicked.connect(self.checkLiveImage)
@@ -284,7 +280,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.liveImage.setPixmap(pix)
 
             if (self.screenshotCheckBox.isChecked() and keyboard.is_pressed(self.screenshot_key)):
-                self.takeScreenshot()
+                self.takeScreenshot(True)
 
         except AttributeError:
             pass
@@ -319,7 +315,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         pix = QtGui.QPixmap(qImg)
         self.currentSplitImage.setPixmap(pix)
 
-    def takeScreenshot(self):
+    def takeScreenshot(self, loop=False):
         # error checks
         if self.splitimagefolderLineEdit.text() == 'No Folder Selected':
             self.splitImageDirectoryError()
@@ -328,7 +324,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.regionError()
             return
 
-        take_screenshot_filename = '001_SplitImage'
+        take_screenshot_filename = 'split_image'
 
         # check if file exists and rename it if it does
         i = 1
@@ -342,7 +338,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
         # save and open image
         cv2.imwrite(self.split_image_directory + take_screenshot_filename + '.png', capture)
-        os.startfile(self.split_image_directory + take_screenshot_filename + '.png')
+        if not loop:
+            os.startfile(self.split_image_directory + take_screenshot_filename + '.png')
 
     def activateScreenshotLoop(self):
         self.screenshotHotkeyIsPressed = True
@@ -535,7 +532,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.screenshot_key = keyboard.read_hotkey(False)
             try:
                 if self.screenshot_key == self.splitLineEdit.text() or self.screenshot_key == self.resetLineEdit.text() or self.screenshot_key == self.skipsplitLineEdit.text() or self.screenshot_key == self.undosplitLineEdit.text():
-                    self.screenshot_hotkey = keyboard.add_hotkey(self.old_screenshot_key, self.startScreenshotLoop)
+                    self.screenshot_hotkey = keyboard.add_hotkey(self.old_screenshot_key, lambda: None if self.screenshotCheckBox.isChecked() else self.takeScreenshot())
                     self.afterSettingHotkeySignal.emit()
                     return
             except AttributeError:
@@ -543,13 +540,14 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 return
             try:
                 if '+' in self.screenshot_key:
-                    self.screenshot_hotkey = keyboard.add_hotkey(self.old_screenshot_key, self.startScreenshotLoop)
+                    self.screenshot_hotkey = keyboard.add_hotkey(self.old_screenshot_key, lambda: None if self.screenshotCheckBox.isChecked() else self.takeScreenshot())
                     self.afterSettingHotkeySignal.emit()
                     return
             except AttributeError:
                 self.afterSettingHotkeySignal.emit()
                 return
-            screenshot_hotkey = keyboard.add_hotkey(self.screenshot_key, self.startScreenshotLoop)
+
+            self.screenshot_hotkey = keyboard.add_hotkey(self.screenshot_key, lambda: None if self.screenshotCheckBox.isChecked() else self.takeScreenshot())
             self.screenshotLineEdit.setText(self.screenshot_key)
             self.old_screenshot_key = self.screenshot_key
             self.afterSettingHotkeySignal.emit()
@@ -701,12 +699,6 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
     def startUndoSplit(self):
         self.undoSplitSignal.emit()
-
-    def startScreenshotLoop(self):
-        self.startScreenshotLoopSignal.emit()
-
-    def endScreenshotLoop(self):
-        self.endScreenshotLoopSignal.emit()
 
     def autoSplitter(self):
         # error checking:
@@ -1095,6 +1087,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.reset_key = str(self.resetLineEdit.text())
         self.skip_split_key = str(self.skipsplitLineEdit.text())
         self.undo_split_key = str(self.undosplitLineEdit.text())
+        self.screenshot_key = str(self.screenshotLineEdit.text())
         self.hwnd_title = win32gui.GetWindowText(self.hwnd)
 
         if self.custompausetimesCheckBox.isChecked():
@@ -1112,15 +1105,24 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         with open('settings.pkl', 'wb') as f:
             pickle.dump(
                 [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
-                 self.reset_key, self.skip_split_key, self.undo_split_key, self.x, self.y, self.width, self.height, self.hwnd_title,
-                 self.custom_pause_times_setting, self.custom_thresholds_setting], f)
+                    self.reset_key, self.skip_split_key, self.undo_split_key, self.screenshot_key, 
+                    self.x, self.y, self.width, self.height, self.hwnd_title, self.custom_pause_times_setting, self.custom_thresholds_setting], f)
 
     def loadSettings(self):
         try:
-            with open('settings.pkl', 'rb') as f:
-                [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
-                 self.reset_key, self.skip_split_key, self.undo_split_key, self.x, self.y, self.width, self.height, self.hwnd_title,
-                 self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f)
+            try:
+                with open('settings.pkl', 'rb') as f:
+                    [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
+                    self.reset_key, self.skip_split_key, self.undo_split_key, self.screenshot_key,
+                    self.x, self.y, self.width, self.height, self.hwnd_title, self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f)
+            except: # It's a old version without the screenshot hotkey
+                with open('settings.pkl', 'rb') as f_legacy:
+                    [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
+                    self.reset_key, self.skip_split_key, self.undo_split_key, self.x, self.y, self.width, self.height, self.hwnd_title,
+                    self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f_legacy)
+                    self.screenshot_key = '', 
+                    self.screenshotCheckBox = False
+
             self.split_image_directory = str(self.split_image_directory)
             self.splitimagefolderLineEdit.setText(self.split_image_directory)
             self.similaritythresholdDoubleSpinBox.setValue(self.similarity_threshold)
@@ -1174,12 +1176,12 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             except ValueError:
                 pass
 
-            # try:
-            #     self.undosplitLineEdit.setText(str(self.screenshot_key))
-            #     self.screenshot_hotkey = keyboard.add_hotkey(str(self.screenshot_key), self.startScreenshot)
-            #     self.old_screenshot_key = self.screenshot_key
-            # except ValueError:
-            #     pass
+            try:
+                self.screenshotLineEdit.setText(str(self.screenshot_key))
+                self.screenshot_hotkey = keyboard.add_hotkey(str(self.screenshot_key), self.takeScreenshot)
+                self.old_screenshot_key = self.screenshot_key
+            except ValueError:
+                pass
 
         except IOError:
             pass
