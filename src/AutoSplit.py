@@ -62,8 +62,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setsplithotkeyButton.clicked.connect(self.setSplitHotkey)
         self.setresethotkeyButton.clicked.connect(self.setResetHotkey)
         self.setskipsplithotkeyButton.clicked.connect(self.setSkipSplitHotkey)
-        self.setundosplithotkeyButton.clicked.connect(self.setUndoSplitHotkey)
         self.alignregionButton.clicked.connect(self.alignRegion)
+        self.setscreenshothotkeyButton.released.connect(self.setScreenshotHotkey)
 
         # update x, y, width, and height when changing the value of these spinbox's are changed
         self.xSpinBox.valueChanged.connect(self.updateX)
@@ -280,6 +280,9 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             pix = QtGui.QPixmap(qImg)
             self.liveImage.setPixmap(pix)
 
+            if (self.screenshotCheckBox.isChecked() and keyboard.is_pressed(self.screenshot_key)):
+                self.takeScreenshot(True)
+
         except AttributeError:
             pass
 
@@ -313,7 +316,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         pix = QtGui.QPixmap(qImg)
         self.currentSplitImage.setPixmap(pix)
 
-    def takeScreenshot(self):
+    def takeScreenshot(self, loop=False):
         # error checks
         if self.splitimagefolderLineEdit.text() == 'No Folder Selected':
             self.splitImageDirectoryError()
@@ -322,7 +325,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.regionError()
             return
 
-        take_screenshot_filename = '001_SplitImage'
+        take_screenshot_filename = 'split_image'
 
         # check if file exists and rename it if it does
         i = 1
@@ -336,7 +339,15 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
         # save and open image
         cv2.imwrite(self.split_image_directory + take_screenshot_filename + '.png', capture)
-        os.startfile(self.split_image_directory + take_screenshot_filename + '.png')
+        if not loop:
+            os.startfile(self.split_image_directory + take_screenshot_filename + '.png')
+
+    def activateScreenshotLoop(self):
+        self.screenshotHotkeyIsPressed = True
+
+    def disableScreenshotLoop(self):
+        self.screenshotHotkeyIsPressed = False
+    
 
     # HOTKEYS. I'll comment on one, and the rest are just variations in variables.
     def setSplitHotkey(self):
@@ -509,6 +520,43 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         t = threading.Thread(target=callback)
         t.start()
         return
+    
+    def setScreenshotHotkey(self):
+        self.setscreenshothotkeyButton.setText('Press a key..')
+        self.beforeSettingHotkey()
+
+        def callback():
+            try:
+                keyboard.remove_hotkey(self.screenshot_hotkey)
+            except AttributeError:
+                pass
+            self.screenshot_key = keyboard.read_hotkey(False)
+            try:
+                if self.screenshot_key == self.splitLineEdit.text() or self.screenshot_key == self.resetLineEdit.text() or self.screenshot_key == self.skipsplitLineEdit.text() or self.screenshot_key == self.undosplitLineEdit.text():
+                    self.screenshot_hotkey = keyboard.add_hotkey(self.old_screenshot_key, lambda: None if self.screenshotCheckBox.isChecked() else self.takeScreenshot())
+                    self.afterSettingHotkeySignal.emit()
+                    return
+            except AttributeError:
+                self.afterSettingHotkeySignal.emit()
+                return
+            try:
+                if '+' in self.screenshot_key:
+                    self.screenshot_hotkey = keyboard.add_hotkey(self.old_screenshot_key, lambda: None if self.screenshotCheckBox.isChecked() else self.takeScreenshot())
+                    self.afterSettingHotkeySignal.emit()
+                    return
+            except AttributeError:
+                self.afterSettingHotkeySignal.emit()
+                return
+
+            self.screenshot_hotkey = keyboard.add_hotkey(self.screenshot_key, lambda: None if self.screenshotCheckBox.isChecked() else self.takeScreenshot())
+            self.screenshotLineEdit.setText(self.screenshot_key)
+            self.old_screenshot_key = self.screenshot_key
+            self.afterSettingHotkeySignal.emit()
+            return
+
+        t = threading.Thread(target=callback)
+        t.start()
+        return
 
     # do all of these after you click "set hotkey" but before you type the hotkey.
     def beforeSettingHotkey(self):
@@ -517,6 +565,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setresethotkeyButton.setEnabled(False)
         self.setskipsplithotkeyButton.setEnabled(False)
         self.setundosplithotkeyButton.setEnabled(False)
+        self.setscreenshothotkeyButton.setEnabled(False)
 
     # do all of these things after you set a hotkey. a signal connects to this because
     # changing GUI stuff in the hotkey thread was causing problems
@@ -525,11 +574,13 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setresethotkeyButton.setText('Set Hotkey')
         self.setskipsplithotkeyButton.setText('Set Hotkey')
         self.setundosplithotkeyButton.setText('Set Hotkey')
+        self.setscreenshothotkeyButton.setText('Set Hotkey')
         self.startautosplitterButton.setEnabled(True)
         self.setsplithotkeyButton.setEnabled(True)
         self.setresethotkeyButton.setEnabled(True)
         self.setskipsplithotkeyButton.setEnabled(True)
         self.setundosplithotkeyButton.setEnabled(True)
+        self.setscreenshothotkeyButton.setEnabled(True)
         return
 
     # check max FPS button connects here.
@@ -652,7 +703,6 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
     def startUndoSplit(self):
         self.undoSplitSignal.emit()
 
-
     def autoSplitter(self):
         # error checking:
         if self.splitimagefolderLineEdit.text() == 'No Folder Selected':
@@ -705,6 +755,12 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setresethotkeyButton.setEnabled(False)
         self.setskipsplithotkeyButton.setEnabled(False)
         self.setundosplithotkeyButton.setEnabled(False)
+<<<<<<< HEAD
+=======
+        self.setscreenshothotkeyButton.setEnabled(False)
+        self.custompausetimesCheckBox.setEnabled(False)
+        self.customthresholdsCheckBox.setEnabled(False)
+>>>>>>> capture-image-each-frames
 
 
         self.split_image_number = args.firstSplitIndex
@@ -736,6 +792,12 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                     self.setresethotkeyButton.setEnabled(True)
                     self.setskipsplithotkeyButton.setEnabled(True)
                     self.setundosplithotkeyButton.setEnabled(True)
+<<<<<<< HEAD
+=======
+                    self.setscreenshothotkeyButton.setEnabled(True)
+                    self.custompausetimesCheckBox.setEnabled(True)
+                    self.customthresholdsCheckBox.setEnabled(True)
+>>>>>>> capture-image-each-frames
                     return
 
                 # grab screenshot of capture region
@@ -858,6 +920,12 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                         self.setresethotkeyButton.setEnabled(True)
                         self.setskipsplithotkeyButton.setEnabled(True)
                         self.setundosplithotkeyButton.setEnabled(True)
+<<<<<<< HEAD
+=======
+                        self.setscreenshothotkeyButton.setEnabled(True)
+                        self.custompausetimesCheckBox.setEnabled(True)
+                        self.customthresholdsCheckBox.setEnabled(True)
+>>>>>>> capture-image-each-frames
                         return
                     # check for skip/undo split:
                     if self.split_image_number != pause_split_image_number:
@@ -880,6 +948,12 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setresethotkeyButton.setEnabled(True)
         self.setskipsplithotkeyButton.setEnabled(True)
         self.setundosplithotkeyButton.setEnabled(True)
+<<<<<<< HEAD
+=======
+        self.setscreenshothotkeyButton.setEnabled(True)
+        self.custompausetimesCheckBox.setEnabled(True)
+        self.customthresholdsCheckBox.setEnabled(True)
+>>>>>>> capture-image-each-frames
         QtGui.QApplication.processEvents()
         if (args.autoClose):
             self.closeEvent(None)
@@ -1029,6 +1103,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.reset_key = str(self.resetLineEdit.text())
         self.skip_split_key = str(self.skipsplitLineEdit.text())
         self.undo_split_key = str(self.undosplitLineEdit.text())
+        self.screenshot_key = str(self.screenshotLineEdit.text())
         self.hwnd_title = win32gui.GetWindowText(self.hwnd)
 
 
@@ -1036,15 +1111,24 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         with open('settings.pkl', 'wb') as f:
             pickle.dump(
                 [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
-                 self.reset_key, self.skip_split_key, self.undo_split_key, self.x, self.y, self.width, self.height, self.hwnd_title,
-                 self.custom_pause_times_setting, self.custom_thresholds_setting], f)
+                    self.reset_key, self.skip_split_key, self.undo_split_key, self.screenshot_key, 
+                    self.x, self.y, self.width, self.height, self.hwnd_title, self.custom_pause_times_setting, self.custom_thresholds_setting], f)
 
     def loadSettings(self):
         try:
-            with open('settings.pkl', 'rb') as f:
-                [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
-                 self.reset_key, self.skip_split_key, self.undo_split_key, self.x, self.y, self.width, self.height, self.hwnd_title,
-                 self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f)
+            try:
+                with open('settings.pkl', 'rb') as f:
+                    [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
+                    self.reset_key, self.skip_split_key, self.undo_split_key, self.screenshot_key,
+                    self.x, self.y, self.width, self.height, self.hwnd_title, self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f)
+            except: # It's a old version without the screenshot hotkey
+                with open('settings.pkl', 'rb') as f_legacy:
+                    [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
+                    self.reset_key, self.skip_split_key, self.undo_split_key, self.x, self.y, self.width, self.height, self.hwnd_title,
+                    self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f_legacy)
+                    self.screenshot_key = '', 
+                    self.screenshotCheckBox = False
+
             self.split_image_directory = str(self.split_image_directory)
             self.splitimagefolderLineEdit.setText(self.split_image_directory)
             self.similaritythresholdDoubleSpinBox.setValue(self.similarity_threshold)
@@ -1084,6 +1168,13 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 self.undosplitLineEdit.setText(str(self.undo_split_key))
                 self.undo_split_hotkey = keyboard.add_hotkey(str(self.undo_split_key), self.startUndoSplit)
                 self.old_undo_split_key = self.undo_split_key
+            except ValueError:
+                pass
+
+            try:
+                self.screenshotLineEdit.setText(str(self.screenshot_key))
+                self.screenshot_hotkey = keyboard.add_hotkey(str(self.screenshot_key), self.takeScreenshot)
+                self.old_screenshot_key = self.screenshot_key
             except ValueError:
                 pass
 
