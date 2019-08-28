@@ -755,12 +755,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setresethotkeyButton.setEnabled(False)
         self.setskipsplithotkeyButton.setEnabled(False)
         self.setundosplithotkeyButton.setEnabled(False)
-<<<<<<< HEAD
-=======
         self.setscreenshothotkeyButton.setEnabled(False)
-        self.custompausetimesCheckBox.setEnabled(False)
-        self.customthresholdsCheckBox.setEnabled(False)
->>>>>>> capture-image-each-frames
 
 
         self.split_image_number = args.firstSplitIndex
@@ -792,12 +787,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                     self.setresethotkeyButton.setEnabled(True)
                     self.setskipsplithotkeyButton.setEnabled(True)
                     self.setundosplithotkeyButton.setEnabled(True)
-<<<<<<< HEAD
-=======
                     self.setscreenshothotkeyButton.setEnabled(True)
-                    self.custompausetimesCheckBox.setEnabled(True)
-                    self.customthresholdsCheckBox.setEnabled(True)
->>>>>>> capture-image-each-frames
                     return
 
                 # grab screenshot of capture region
@@ -920,12 +910,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                         self.setresethotkeyButton.setEnabled(True)
                         self.setskipsplithotkeyButton.setEnabled(True)
                         self.setundosplithotkeyButton.setEnabled(True)
-<<<<<<< HEAD
-=======
                         self.setscreenshothotkeyButton.setEnabled(True)
-                        self.custompausetimesCheckBox.setEnabled(True)
-                        self.customthresholdsCheckBox.setEnabled(True)
->>>>>>> capture-image-each-frames
                         return
                     # check for skip/undo split:
                     if self.split_image_number != pause_split_image_number:
@@ -948,12 +933,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setresethotkeyButton.setEnabled(True)
         self.setskipsplithotkeyButton.setEnabled(True)
         self.setundosplithotkeyButton.setEnabled(True)
-<<<<<<< HEAD
-=======
         self.setscreenshothotkeyButton.setEnabled(True)
-        self.custompausetimesCheckBox.setEnabled(True)
-        self.customthresholdsCheckBox.setEnabled(True)
->>>>>>> capture-image-each-frames
         QtGui.QApplication.processEvents()
         if (args.autoClose):
             self.closeEvent(None)
