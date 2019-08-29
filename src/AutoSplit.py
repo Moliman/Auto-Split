@@ -9,6 +9,7 @@ import ctypes
 import keyboard
 import threading
 import pickle
+import json
 import numpy as np
 import argparse
 
@@ -1096,20 +1097,40 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                     self.reset_key, self.skip_split_key, self.undo_split_key, self.screenshot_key, 
                     self.x, self.y, self.width, self.height, self.hwnd_title, self.custom_pause_times_setting, self.custom_thresholds_setting], f)
 
+        #save settings to settings.pkl
+        with open('settings.json', 'wt') as f:
+            json.dump({
+                "split_image_directory": self.split_image_directory, 
+                "similarity_threshold": self.similarity_threshold,
+                "comparison_index": self.comparison_index,
+                "pause": self.pause, 
+                "fps_limit": self.fps_limit,
+                "split_key": self.split_key,
+                "reset_key": self.reset_key, 
+                "skip_split_key": self.skip_split_key, 
+                "undo_split_key": self.undo_split_key, 
+                "screenshot_key": self.screenshot_key,
+                "x": self.x, "y": self.y, "width": self.width, "height": self.height, 
+                "hwnd_title": self.hwnd_title, 
+                "custom_pause_times_setting": self.custom_pause_times_setting, 
+                "custom_thresholds_setting": self.custom_thresholds_setting
+                }, f, indent=4)
+
     def loadSettings(self):
         try:
             try:
+                with open('settings.json', 'rt') as f:
+                    jsonData = json.load(f)
+                for data in jsonData:
+                    setattr(self, data, jsonData[data])
+            
+            # In case if the old format is used
+            except IOError:
                 with open('settings.pkl', 'rb') as f:
                     [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
-                    self.reset_key, self.skip_split_key, self.undo_split_key, self.screenshot_key,
-                    self.x, self.y, self.width, self.height, self.hwnd_title, self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f)
-            except: # It's a old version without the screenshot hotkey
-                with open('settings.pkl', 'rb') as f_legacy:
-                    [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
                     self.reset_key, self.skip_split_key, self.undo_split_key, self.x, self.y, self.width, self.height, self.hwnd_title,
-                    self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f_legacy)
-                    self.screenshot_key = '', 
-                    self.screenshotCheckBox = False
+                    self.custom_pause_times_setting, self.custom_thresholds_setting] = pickle.load(f)
+
 
             self.split_image_directory = str(self.split_image_directory)
             self.splitimagefolderLineEdit.setText(self.split_image_directory)
