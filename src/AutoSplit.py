@@ -1102,15 +1102,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         else:
             self.custom_thresholds_setting = 0
 
-
-        #save settings to settings.pkl
-        with open('settings.pkl', 'wb') as f:
-            pickle.dump(
-                [self.split_image_directory, self.similarity_threshold, self.comparison_index, self.pause, self.fps_limit, self.split_key,
-                    self.reset_key, self.skip_split_key, self.undo_split_key, self.screenshot_key, 
-                    self.x, self.y, self.width, self.height, self.hwnd_title, self.custom_pause_times_setting, self.custom_thresholds_setting], f)
-
-        #save settings to settings.pkl
+        #save settings to settings.json
         with open('settings.json', 'wt') as f:
             json.dump({
                 "split_image_directory": self.split_image_directory, 
