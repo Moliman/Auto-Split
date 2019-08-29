@@ -62,6 +62,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setsplithotkeyButton.clicked.connect(self.setSplitHotkey)
         self.setresethotkeyButton.clicked.connect(self.setResetHotkey)
         self.setskipsplithotkeyButton.clicked.connect(self.setSkipSplitHotkey)
+        self.setundosplithotkeyButton.clicked.connect(self.setUndoSplitHotkey)
         self.alignregionButton.clicked.connect(self.alignRegion)
         self.setscreenshothotkeyButton.released.connect(self.setScreenshotHotkey)
 
@@ -371,7 +372,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             # If the key the user presses is equal to itself or another hotkey already set,
             # this causes issues. so here, it catches that, and will make no changes to the hotkey.
             try:
-                if self.split_key == self.splitLineEdit.text() or self.split_key == self.resetLineEdit.text() or self.split_key == self.skipsplitLineEdit.text() or self.split_key == self.undosplitLineEdit.text():
+                if self.split_key == self.splitLineEdit.text() or self.split_key == self.resetLineEdit.text() or self.split_key == self.skipsplitLineEdit.text() or self.split_key == self.undosplitLineEdit.text() or self.split_key == self.screenshotLineEdit.text():
                     self.split_hotkey = keyboard.add_hotkey(self.old_split_key, self.startAutoSplitter)
                     self.afterSettingHotkeySignal.emit()
                     return
@@ -416,7 +417,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 pass
             self.reset_key = keyboard.read_hotkey(False)
             try:
-                if self.reset_key == self.splitLineEdit.text() or self.reset_key == self.resetLineEdit.text() or self.reset_key == self.skipsplitLineEdit.text() or self.reset_key == self.undosplitLineEdit.text():
+                if self.reset_key == self.splitLineEdit.text() or self.reset_key == self.resetLineEdit.text() or self.reset_key == self.skipsplitLineEdit.text() or self.reset_key == self.undosplitLineEdit.text() or self.reset_key == self.screenshotLineEdit.text():
                     self.reset_hotkey = keyboard.add_hotkey(self.old_reset_key, self.startReset)
                     self.afterSettingHotkeySignal.emit()
                     return
@@ -454,7 +455,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.skip_split_key = keyboard.read_hotkey(False)
 
             try:
-                if self.skip_split_key == self.splitLineEdit.text() or self.skip_split_key == self.resetLineEdit.text() or self.skip_split_key == self.skipsplitLineEdit.text() or self.skip_split_key == self.undosplitLineEdit.text():
+                if self.skip_split_key == self.splitLineEdit.text() or self.skip_split_key == self.resetLineEdit.text() or self.skip_split_key == self.skipsplitLineEdit.text() or self.skip_split_key == self.undosplitLineEdit.text() or self.skip_split_key == self.screenshotLineEdit.text():
                     self.skip_split_hotkey = keyboard.add_hotkey(self.old_skip_split_key, self.startSkipSplit)
                     self.afterSettingHotkeySignal.emit()
                     return
@@ -494,7 +495,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.undo_split_key = keyboard.read_hotkey(False)
 
             try:
-                if self.undo_split_key == self.splitLineEdit.text() or self.undo_split_key == self.resetLineEdit.text() or self.undo_split_key == self.skipsplitLineEdit.text() or self.undo_split_key == self.undosplitLineEdit.text():
+                if self.undo_split_key == self.splitLineEdit.text() or self.undo_split_key == self.resetLineEdit.text() or self.undo_split_key == self.skipsplitLineEdit.text() or self.undo_split_key == self.undosplitLineEdit.text() or self.undo_split_key == self.screenshotLineEdit.text():
                     self.undo_split_hotkey = keyboard.add_hotkey(self.old_undo_split_key, self.startUndoSplit)
                     self.afterSettingHotkeySignal.emit()
                     return
@@ -532,7 +533,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 pass
             self.screenshot_key = keyboard.read_hotkey(False)
             try:
-                if self.screenshot_key == self.splitLineEdit.text() or self.screenshot_key == self.resetLineEdit.text() or self.screenshot_key == self.skipsplitLineEdit.text() or self.screenshot_key == self.undosplitLineEdit.text():
+                if self.screenshot_key == self.splitLineEdit.text() or self.screenshot_key == self.resetLineEdit.text() or self.screenshot_key == self.skipsplitLineEdit.text() or self.screenshot_key == self.undosplitLineEdit.text() or self.screenshot_key == self.screenshotLineEdit.text():
                     self.screenshot_hotkey = keyboard.add_hotkey(self.old_screenshot_key, lambda: None if self.screenshotCheckBox.isChecked() else self.takeScreenshot())
                     self.afterSettingHotkeySignal.emit()
                     return
