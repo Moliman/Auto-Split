@@ -281,7 +281,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             pix = QtGui.QPixmap(qImg)
             self.liveImage.setPixmap(pix)
 
-            if (self.screenshotCheckBox.isChecked() and keyboard.is_pressed(self.screenshot_key)):
+            if (self.screenshotCheckBox.isChecked() and self.screenshot_key != '' and keyboard.is_pressed(self.screenshot_key)):
                 self.takeScreenshot(True)
 
         except AttributeError:
