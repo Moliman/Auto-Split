@@ -337,7 +337,7 @@ class Ui_MainWindow(object):
         self.screenshotCheckBox = QtGui.QCheckBox(self.centralwidget)
         self.screenshotCheckBox.setEnabled(True)
         self.screenshotCheckBox.setGeometry(QtCore.QRect(500, 350, 121, 31))
-        self.screenshotCheckBox.setChecked(True)
+        self.screenshotCheckBox.setChecked(False)
         self.screenshotCheckBox.setTristate(False)
         self.screenshotCheckBox.setObjectName(_fromUtf8("screenshotCheckBox"))
         self.splitimagefolderLabel.raise_()
