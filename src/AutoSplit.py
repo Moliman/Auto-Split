@@ -1024,6 +1024,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         msgBox.exec_()
 
     def saveSettings(self):
+        if args.noSave:
+            return
         #get values to be able to save settings
         self.x = self.xSpinBox.value()
         self.y = self.ySpinBox.value()
@@ -1203,6 +1205,7 @@ def commandLineParseArgs():
     help='close after last split or reset. (Avoid it without --autoLaunch)', action='store_true')
     parser.add_argument('-i', '--firstSplitIndex', type=int,
     help='the first image will at the specific numer asked. (Avoid it without --autoLaunch)', default=0)
+    parser.add_argument('-n', '--noSave', help="won't save settings at close", action='store_true')
     return parser.parse_args()
 
 def main():
