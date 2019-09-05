@@ -770,7 +770,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
             # second while loop: stays in this loop until similarity threshold is met
             start = time.time()
-            while self.similarity < self.similaritythresholdDoubleSpinBox.value():
+            while self.similarity < self.similarity_threshold:
                 # reset if the set screen region window was closed
                 if win32gui.GetWindowText(self.hwnd) == '':
                     self.reset()
@@ -894,7 +894,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 # I have a pause loop here so that it can check if the user presses skip split, undo split, or reset here.
                 # This should probably eventually be a signal... but it works
                 pause_start_time = time.time()
-                while time.time() - pause_start_time < self.pauseDoubleSpinBox.value():
+                while time.time() - pause_start_time < self.pause:
                     # check for reset
                     if win32gui.GetWindowText(self.hwnd) == '':
                         self.reset()
@@ -995,7 +995,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
         threshold = split_parser.threshold_from_filename(split_image_file)
         if threshold != None:
-            self.threshold = threshold
+            self.similarity_threshold = threshold
 
         self.similarity = 0
         self.highest_similarity = 0.001
