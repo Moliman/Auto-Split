@@ -16,6 +16,8 @@ import about
 import compare
 import capture_windows
 import split_parser
+import TCPClient
+import Command
 
 class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
     myappid = u'mycompany.myproduct.subproduct.version'
@@ -89,6 +91,9 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
         # try to load settings
         self.loadSettings()
+
+        self.tcpClient = TCPClient.TCPClient(self)
+        self.tcpClient.start()
 
     # FUNCTIONS
 
@@ -278,6 +283,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             qImg = QtGui.QImage(capture, capture.shape[1], capture.shape[0], capture.shape[1] * 3, QtGui.QImage.Format_RGB888)
             pix = QtGui.QPixmap(qImg)
             self.liveImage.setPixmap(pix)
+            Command.executeCommand(self, self.tcpClient.read())
 
         except AttributeError:
             pass
@@ -583,14 +589,22 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
     # undo split button and hotkey connect to here
     def undoSplit(self):
-        # if the auto splitter is paused or the undo split button is enabled, do nothing.
-        if self.undosplitButton.isEnabled() == False or self.split_image_number == 0:
+        self.setSplit(self.split_image_number - 1)
+        return
+
+    # skip split button and hotkey connect to here
+    def skipSplit(self, splitNumber=-1):
+        self.setSplit(self.split_image_number + 1)
+        return
+
+    def setSplit(self, splitNumber=-1):
+        # if the auto splitter is paused do nothing.
+        if self.skipsplitButton.isEnabled() == False or 0 > splitNumber or splitNumber > self.number_of_split_images - 1:
             return
 
-        # subtract 1 from the split image number
-        self.split_image_number = self.split_image_number - 1
-
-        # if i'ts the last split image, disable skip split button
+        self.split_image_number = splitNumber
+          
+        # if it's the last split image, disable skip split button
         if self.split_image_number == self.number_of_split_images - 1:
             self.skipsplitButton.setEnabled(False)
         else:
@@ -603,28 +617,6 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.undosplitButton.setEnabled(True)
 
         self.updateSplitImage()
-
-        return
-
-    # skip split button and hotkey connect to here
-    def skipSplit(self):
-
-        if self.skipsplitButton.isEnabled() == False or self.split_image_number == self.number_of_split_images - 1:
-            return
-
-        self.split_image_number = self.split_image_number + 1
-
-        if self.split_image_number == self.number_of_split_images - 1:
-            self.skipsplitButton.setEnabled(False)
-        else:
-            self.skipsplitButton.setEnabled(True)
-        if self.split_image_number == 0:
-            self.undosplitButton.setEnabled(False)
-        else:
-            self.undosplitButton.setEnabled(True)
-
-        self.updateSplitImage()
-
         return
 
     # reset button and hotkey connects here.
@@ -750,6 +742,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                     self.custompausetimesCheckBox.setEnabled(True)
                     self.customthresholdsCheckBox.setEnabled(True)
                     return
+
+                # Command.executeCommand(self, self.tcpClient.read())
 
                 # grab screenshot of capture region
                 capture = capture_windows.capture_region(self.hwnd, self.rect)
