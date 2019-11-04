@@ -366,7 +366,7 @@ class Ui_MainWindow(object):
         self.bufferScreenshotTotalImageSpinBox.setMinimum(1.0)
         self.bufferScreenshotTotalImageSpinBox.setMaximum(999.0)
         self.bufferScreenshotTotalImageSpinBox.setSingleStep(1.0)
-        self.bufferScreenshotTotalImageSpinBox.setProperty("value", 120.0)
+        self.bufferScreenshotTotalImageSpinBox.setProperty("value", 1.0)
         self.bufferScreenshotTotalImageSpinBox.setObjectName(_fromUtf8("bufferScreenshotTotalImageSpinBox"))
         self.splitimagefolderLabel.raise_()
         self.splitimagefolderLineEdit.raise_()
