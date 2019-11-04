@@ -1148,7 +1148,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.screenshot_key = str(self.screenshotLineEdit.text())
         self.buffer_screenshot_key = str(self.bufferScreenshotLineEdit.text())
         self.buffer_screenshot_limit = self.bufferScreenshotTotalImageSpinBox.value()
-        self.hwnd_title = win32gui.GetWindowText(self.hwnd)
+        if win32gui.GetWindowText(self.hwnd) != '':
+            self.hwnd_title = win32gui.GetWindowText(self.hwnd)
 
         if self.custompausetimesCheckBox.isChecked():
             self.custom_pause_times_setting = 1
