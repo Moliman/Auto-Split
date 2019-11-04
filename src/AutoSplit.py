@@ -1206,7 +1206,6 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.ySpinBox.setValue(self.y)
             self.widthSpinBox.setValue(self.width)
             self.heightSpinBox.setValue(self.height)
-            self.bufferScreenshotTotalImageSpinBox.setValue(self.buffer_screenshot_limit)
             self.comparisonmethodComboBox.setCurrentIndex(self.comparison_index)
             self.hwnd = win32gui.FindWindow(None, self.hwnd_title)
 
@@ -1264,6 +1263,10 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 self.old_bufferScreenshot_key = self.buffer_screenshot_key
             except:
                 pass
+
+            # Data of newer version must be check, since new data will be initially valueless
+            try: self.bufferScreenshotTotalImageSpinBox.setValue(self.buffer_screenshot_limit) 
+            except: pass
 
         except IOError:
             pass
