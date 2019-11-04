@@ -94,12 +94,22 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.rect = ctypes.wintypes.RECT()
 
         self.bufferImage = []
+        self.remote_enabled = False
+        self.remote_ip = '127.0.0.1'
+        self.remote_port = 16834
 
         # try to load settings
         self.loadSettings()
 
-        self.tcpClient = TCPClient.TCPClient(self)
-        self.tcpClient.start()
+        if self.remote_enabled:
+            self.tcpClient = TCPClient.TCPClient(self, self.remote_ip, self.remote_port)
+            try:
+                self.tcpClient.start()
+            except:
+                msgBox = QtGui.QMessageBox()
+                msgBox.setWindowTitle('Error')
+                msgBox.setText("Fail to connect to the server. You should reset the program to retry")
+                msgBox.exec_()
 
     # FUNCTIONS
 
@@ -1172,7 +1182,10 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                 "x": self.x, "y": self.y, "width": self.width, "height": self.height, 
                 "hwnd_title": self.hwnd_title, 
                 "custom_pause_times_setting": self.custom_pause_times_setting, 
-                "custom_thresholds_setting": self.custom_thresholds_setting
+                "custom_thresholds_setting": self.custom_thresholds_setting,
+                "remote_enabled" : self.remote_enabled,
+                "remote_ip" : self.remote_ip,
+                "remote_port" : self.remote_port
                 }, f, indent=4)
 
     def loadSettings(self):
