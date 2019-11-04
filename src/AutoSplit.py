@@ -707,11 +707,11 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         return
 
     # skip split button and hotkey connect to here
-    def skipSplit(self, splitNumber=-1):
+    def skipSplit(self):
         self.setSplit(self.split_image_number + 1)
         return
 
-    def setSplit(self, splitNumber=-1):
+    def setSplit(self, splitNumber):
         # if the auto splitter is paused do nothing.
         if self.skipsplitButton.isEnabled() == False or 0 > splitNumber or splitNumber > self.number_of_split_images - 1:
             return
