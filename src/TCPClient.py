@@ -1,7 +1,6 @@
 import socket
-from icommunication import icommunication
 
-class TCPClient(icommunication):
+class TCPClient(object):
     def __init__(self, autoSplit, ip, port):
         self.AutoSplit = autoSplit
         self.socket = None
