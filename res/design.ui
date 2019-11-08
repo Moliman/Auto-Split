@@ -139,7 +139,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>374</y>
+      <y>380</y>
       <width>91</width>
       <height>16</height>
      </rect>
@@ -235,7 +235,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>420</y>
+      <y>430</y>
       <width>111</width>
       <height>16</height>
      </rect>
@@ -1029,56 +1029,6 @@
      <double>10.000000000000000</double>
     </property>
    </widget>
-   <widget class="QCheckBox" name="custompausetimesCheckBox">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>435</y>
-      <width>121</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="whatsThis">
-     <string/>
-    </property>
-    <property name="text">
-     <string>Custom pause times</string>
-    </property>
-    <property name="checked">
-     <bool>false</bool>
-    </property>
-    <property name="tristate">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="customthresholdsCheckBox">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>390</y>
-      <width>111</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="whatsThis">
-     <string/>
-    </property>
-    <property name="text">
-     <string>Custom thresholds</string>
-    </property>
-    <property name="checked">
-     <bool>false</bool>
-    </property>
-    <property name="tristate">
-     <bool>false</bool>
-    </property>
-   </widget>
    <widget class="QLabel" name="comparisonmethodLabel">
     <property name="geometry">
      <rect>
@@ -1280,8 +1230,6 @@
    <zorder>yLabel</zorder>
    <zorder>comparisonmethodComboBox</zorder>
    <zorder>pauseDoubleSpinBox</zorder>
-   <zorder>custompausetimesCheckBox</zorder>
-   <zorder>customthresholdsCheckBox</zorder>
    <zorder>comparisonmethodLabel</zorder>
    <zorder>alignregionButton</zorder>
    <zorder>screenshotLineEdit</zorder>
