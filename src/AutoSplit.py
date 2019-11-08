@@ -19,7 +19,7 @@ import compare
 import capture_windows
 import split_parser
 import TCPClient
-import Command
+from Command import Command
 
 class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
     myappid = u'mycompany.myproduct.subproduct.version'
@@ -106,6 +106,10 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.tcpClient = TCPClient.TCPClient(self, self.remote_ip, self.remote_port)
             try:
                 self.tcpClient.start()
+                self.commands = Command(self)
+                self.timerReadCommand = QtCore.QTimer()
+                self.timerReadCommand.timeout.connect(self.readCommands)
+                self.timerReadCommand.start(1000 / 60)
             except:
                 msgBox = QtGui.QMessageBox()
                 msgBox.setWindowTitle('Error')
@@ -301,11 +305,12 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             qImg = QtGui.QImage(capture, capture.shape[1], capture.shape[0], capture.shape[1] * 3, QtGui.QImage.Format_RGB888)
             pix = QtGui.QPixmap(qImg)
             self.liveImage.setPixmap(pix)
-            Command.executeCommand(self, self.tcpClient.read())
-
 
         except AttributeError:
             pass
+
+    def readCommands(self):
+        self.commands.executeCommand(self.tcpClient.read())
 
     # update x, y, width, height when spinbox values are changed
     def updateX(self):
@@ -767,6 +772,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.regionError()
             return
 
+        self.timerReadCommand.stop()
+
         # Make sure that each of the images follows the guidelines for correct format
         # according to all of the settings selected by the user.
         for image in os.listdir(self.split_image_directory):
@@ -843,9 +850,10 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
                     self.setskipsplithotkeyButton.setEnabled(True)
                     self.setundosplithotkeyButton.setEnabled(True)
                     self.setscreenshothotkeyButton.setEnabled(True)
+                    self.timerReadCommand.start(1000/60)
                     return
 
-                # Command.executeCommand(self, self.tcpClient.read())
+                self.readCommands()
 
                 # grab screenshot of capture region
                 capture = capture_windows.capture_region(self.hwnd, self.rect)
@@ -992,6 +1000,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.setundosplithotkeyButton.setEnabled(True)
         self.setscreenshothotkeyButton.setEnabled(True)
         QtGui.QApplication.processEvents()
+        self.timerReadCommand.start(1000/60)
         if (args.autoClose):
             self.closeEvent(None)
 
