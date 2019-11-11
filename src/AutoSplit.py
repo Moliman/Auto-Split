@@ -1270,6 +1270,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             except: pass
 
         except IOError:
+            # Default value in case they there is no save file and to prevent undefined some variables
+            self.hwnd_title = ""
             pass
 
     # exit safely when closing the window
