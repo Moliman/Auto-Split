@@ -95,21 +95,18 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.rect = ctypes.wintypes.RECT()
 
         self.bufferImage = []
-        self.remote_enabled = False
-        self.remote_ip = '127.0.0.1'
-        self.remote_port = 16834
 
         # try to load settings
         self.loadSettings()
 
+        self.timerReadCommand = QtCore.QTimer()
+        self.timerReadCommand.timeout.connect(self.readCommands)
+        self.timerReadCommand.start(1000 / 60)
         if self.remote_enabled:
             self.tcpClient = TCPClient.TCPClient(self, self.remote_ip, self.remote_port)
             try:
                 self.tcpClient.start()
                 self.commands = Command(self)
-                self.timerReadCommand = QtCore.QTimer()
-                self.timerReadCommand.timeout.connect(self.readCommands)
-                self.timerReadCommand.start(1000 / 60)
             except:
                 msgBox = QtGui.QMessageBox()
                 msgBox.setWindowTitle('Error')
@@ -310,7 +307,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             pass
 
     def readCommands(self):
-        self.commands.executeCommand(self.tcpClient.read())
+        if (self.remote_enabled):
+            self.commands.executeCommand(self.tcpClient.read())
 
     # update x, y, width, height when spinbox values are changed
     def updateX(self):
@@ -1276,6 +1274,10 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             except: pass
 
         except IOError:
+            # Default value in case they there is no save file and to prevent undefined some variables
+            self.remote_enabled = False
+            self.remote_ip = '127.0.0.1'
+            self.remote_port = 16834
             pass
 
     # exit safely when closing the window
