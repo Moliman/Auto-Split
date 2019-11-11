@@ -1071,7 +1071,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         return source.shape[2] == 4
         
     def updateBuffer(self, image):
-        while (len(self.bufferImage) >= self.buffer_screenshot_limit):
+        while (len(self.bufferImage) >= self.bufferScreenshotTotalImageSpinBox.value()):
             self.bufferImage.pop(0)
         self.bufferImage.append(image)
 
@@ -1275,6 +1275,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
 
         except IOError:
             # Default value in case they there is no save file and to prevent undefined some variables
+            self.hwnd_title = ""
             self.remote_enabled = False
             self.remote_ip = '127.0.0.1'
             self.remote_port = 16834
