@@ -1064,7 +1064,7 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.highest_similarity = 0.001
 
     def updateBuffer(self, image):
-        while (len(self.bufferImage) >= self.buffer_screenshot_limit):
+        while (len(self.bufferImage) >= self.bufferScreenshotTotalImageSpinBox.value()):
             self.bufferImage.pop(0)
         self.bufferImage.append(image)
 
