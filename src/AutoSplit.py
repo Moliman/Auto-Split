@@ -20,6 +20,7 @@ import capture_windows
 import split_parser
 import TCPClient
 from Command import Command
+import collections
 
 class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
     myappid = u'mycompany.myproduct.subproduct.version'
@@ -94,7 +95,8 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.hwnd = 0
         self.rect = ctypes.wintypes.RECT()
 
-        self.bufferImage = []
+        self.bufferImage = collections.deque(maxlen=999)
+        self.allTheBufferCapture = False
 
         # try to load settings
         self.loadSettings()
@@ -336,7 +338,6 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.checkLiveImage()
 
     def updateBufferLimit(self):
-        self.buffer_screenshot_limit = self.bufferScreenshotTotalImageSpinBox.value()
         pass
 
     # update current split image. needed this to avoid updating it through the hotkey thread.
@@ -345,9 +346,10 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         self.currentSplitImage.setPixmap(pix)
 
     def takeBufferScrenshot(self):
-        self.takeScreenshot(True)
+        self.allTheBufferCapture = True
+        self.takeScreenshot()
 
-    def takeScreenshot(self, allTheBuffer=False):
+    def takeScreenshot(self):
         # error checks
         if self.splitimagefolderLineEdit.text() == 'No Folder Selected':
             self.splitImageDirectoryError()
@@ -356,30 +358,36 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
             self.regionError()
             return
 
-        take_screenshot_filename = 'split_image'
+        if self.allTheBufferCapture:
+            take_screenshot_filename = 'split_image (1)'
+        else:
+            take_screenshot_filename = 'split_image'
+
         i = 1
-        bufferI = 0
-        while bufferI < len(self.bufferImage):
-            if allTheBuffer == False:
+        while len(self.bufferImage) > 0:
+            if self.allTheBufferCapture == False:
                 # Take only the last captured screenshot
-                bufferI = len(self.bufferImage) -1 
+                capture = self.bufferImage.pop()
+            else:
+                capture = self.bufferImage.popleft()
 
             # check if file exists and rename it if it does
             while os.path.exists(self.split_image_directory + take_screenshot_filename + '.png') == True:
                 take_screenshot_filename = 'split_image' + ' ' + '(' + str(i) + ')'
                 i = i + 1
 
-            capture = self.bufferImage[bufferI]
             capture = cv2.cvtColor(capture, cv2.COLOR_BGRA2BGR)
 
             # save the image
             cv2.imwrite(self.split_image_directory + take_screenshot_filename + '.png', capture)
-            bufferI += 1
+
+            # open the image
+            if not self.allTheBufferCapture:
+                os.startfile(self.split_image_directory + take_screenshot_filename + '.png')
+                break
             pass
 
-        # open the image
-        if not allTheBuffer:
-            os.startfile(self.split_image_directory + take_screenshot_filename + '.png')
+        self.allTheBufferCapture = False
 
 
     # HOTKEYS. I'll comment on one, and the rest are just variations in variables.
@@ -1071,9 +1079,10 @@ class AutoSplit(QtGui.QMainWindow, design.Ui_MainWindow):
         return source.shape[2] == 4
         
     def updateBuffer(self, image):
-        while (len(self.bufferImage) >= self.bufferScreenshotTotalImageSpinBox.value()):
-            self.bufferImage.pop(0)
-        self.bufferImage.append(image)
+        if not self.allTheBufferCapture:
+            while (len(self.bufferImage) >= self.bufferScreenshotTotalImageSpinBox.value()):
+                self.bufferImage.popleft()
+            self.bufferImage.append(image)
 
     # Error messages
 
